@@ -1,4 +1,3 @@
-
 📋 Sobre o Projeto
 O Projeto ESG é uma aplicação desenvolvida para auxiliar empresas na gestão e monitoramento de suas práticas ambientais, sociais e de governança. A plataforma oferece ferramentas para rastrear, analisar e reportar métricas ESG, permitindo que organizações tomem decisões mais sustentáveis e responsáveis.
 🔧 Tecnologias Utilizadas
