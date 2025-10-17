@@ -7,31 +7,22 @@ on:
     branches: [main]
 
 jobs:
-  build-and-test:
+  debug-structure:
     runs-on: ubuntu-latest
     
     steps:
     - uses: actions/checkout@v3
     
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-    
-    # ADICIONE ESTA LINHA para navegar até a pasta correta
-    - name: Navigate to project directory
+    - name: Show project structure
       run: |
+        echo "=== Current directory ==="
+        pwd
+        echo ""
+        echo "=== All files in repository ==="
         ls -la
-        find . -name "pom.xml"
-    
-    - name: Build with Maven
-      run: mvn clean install
-      working-directory: ./sua-pasta-do-projeto  # ← AJUSTE AQUI
-    
-    - name: Run Tests
-      run: mvn test
-      working-directory: ./sua-pasta-do-projeto  # ← AJUSTE AQUI
-    
-    - name: Build Docker Image
-      run: docker build -t esg-app .
+        echo ""
+        echo "=== Looking for pom.xml ==="
+        find . -name "pom.xml" -type f
+        echo ""
+        echo "=== Looking for src folder ==="
+        find . -name "src" -type d
