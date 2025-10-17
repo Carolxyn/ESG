@@ -1,28 +1,29 @@
+# Build stage
 FROM eclipse-temurin:17-jdk-alpine AS build
-WORKDIR /workspace/app
+WORKDIR /app
 
-# Copiar maven wrapper e POM (manter as camadas do cache)
-COPY mvnw .
-COPY .mvn .mvn
+# Copiar arquivos do projeto
 COPY pom.xml .
+COPY src ./src
 
-# Corrigir permissões e configurar encoding UTF-8
-RUN chmod +x ./mvnw
-ENV MAVEN_OPTS="-Dfile.encoding=UTF-8"
+# Build da aplicação
+RUN apk add --no-cache maven && \
+    mvn clean package -DskipTests && \
+    apk del maven
 
-# Para manter camadas de dependências no cache, instalamos as dependências
-RUN ./mvnw dependency:go-offline -B
-
-# Copiar o código-fonte
-COPY src src
-
-# Corrigir codificação dos arquivos de propriedades
-RUN find /workspace/app/src -name "*.properties" -type f -exec sh -c 'iconv -f ISO-8859-1 -t UTF-8 {} > {}.utf8 && mv {}.utf8 {}' \;
-
-# Compilar a aplicação
-RUN ./mvnw package -DskipTests -Dproject.build.sourceEncoding=UTF-8 -Dproject.reporting.outputEncoding=UTF-8
-
+# Runtime stage
 FROM eclipse-temurin:17-jre-alpine
 WORKDIR /app
-COPY --from=build /workspace/app/target/*.jar app.jar
-ENTRYPOINT ["java","-jar","/app/app.jar"]
+
+# Copiar o JAR do build stage
+COPY --from=build /app/target/*.jar app.jar
+
+# Expor a porta
+EXPOSE 8080
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=40s \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/actuator/health || exit 1
+
+# Comando de entrada
+ENTRYPOINT ["java", "-jar", "app.jar"]
