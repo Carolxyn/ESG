@@ -1,6 +1,8 @@
+name: CI/CD Pipeline
+
 on:
   push:
-    branches: [main, develop]
+    branches: [main, develop, feature/primeira-action]
   pull_request:
     branches: [main]
 
@@ -17,38 +19,19 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
     
+    # ADICIONE ESTA LINHA para navegar até a pasta correta
+    - name: Navigate to project directory
+      run: |
+        ls -la
+        find . -name "pom.xml"
+    
     - name: Build with Maven
       run: mvn clean install
+      working-directory: ./sua-pasta-do-projeto  # ← AJUSTE AQUI
     
     - name: Run Tests
       run: mvn test
+      working-directory: ./sua-pasta-do-projeto  # ← AJUSTE AQUI
     
     - name: Build Docker Image
       run: docker build -t esg-app .
-
-  deploy-staging:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/develop'
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Deploy to Staging
-      run: |
-        echo "Deploying to staging..."
-        docker-compose up -d
-
-  deploy-production:
-    needs: build-and-test
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    environment: production
-    
-    steps:
-    - uses: actions/checkout@v3
-    
-    - name: Deploy to Production
-      run: |
-        echo "Deploying to production..."
-        docker-compose up -d
